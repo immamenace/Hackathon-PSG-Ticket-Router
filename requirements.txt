@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+scikit-learn
+transformers
+torch
+redis
+celery
+httpx

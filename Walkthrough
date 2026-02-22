@@ -1,0 +1,44 @@
+# "Smart-Support" Ticket Routing Engine Walkthrough
+
+Congratulations on setting up the Hackathon project! We have successfully implemented a system that is robust enough to handle the requirements in **Milestone 1 (Minimum Viable Router)** and **Milestone 2 (The Intelligent Queue)**.
+
+## What was built
+The codebase is a unified FastAPI application located in `c:/Users/g3dhi/OneDrive/Desktop/Hackathon-PSG/`.
+
+### Milestone 1: Minimum Viable Router (MVR)
+- **ML Baseline Component (`m1_mvr/ml_baseline.py`)**: Uses a TF-IDF vectorizer + Multinomial Naive Bayes classifier trained on a dummy dataset to categorize tickets into Billing, Technical, and Legal. It includes a regex function for picking up urgent keywords like "urgent", "critical", or "ASAP".
+- **In-Memory Priority Queue (`m1_mvr/queue_manager.py`)**: Utilizes Python's `heapq` to create a priority queue, where highly urgent tickets correctly skip to the front of the queue.
+- **Synchronous Endpoint**: Exposed at `/mvr/ticket`.
+
+### Milestone 2: The Intelligent Queue
+- **Advanced ML Component (`m2_advanced/ml_transformers.py`)**: Utilizes HuggingFace's zero-shot classification (`facebook/bart-large-mnli`) and sentiment analysis (`distilbert`) to generate an advanced sentiment regresssion-based urgency score ($S \in [0, 1]$).
+- **Asynchronous Message Broker (`m2_advanced/celery_worker.py`)**: A Celery worker instance configured to use **Redis** as the message broker.
+- **FastAPI 202 Accepted Endpoint (`m2_advanced/router.py`)**: Exposed at `/advanced/ticket`. It returns `202 Accepted` immediately while delegating the complex ML processing to the background.
+- **Redis Atomic Locks**: Solves the concurrent race conditions by using a `SETNX` (Set if Not eXists) lock on the `ticket_id` within Redis, guaranteeing only one of a blast of 10+ identical requests successfully enters the background queue. All subsequent duplicate requests receive a `409 Conflict`.
+- **Mock Webhook Alert (`m2_advanced/webhook.py`)**: An async HTTP POST fires if the advanced NLP model detects a high urgency ($S > 0.8$).
+
+## How to Test and Verify
+
+### Prerequisites
+1. **Install Dependencies**: `pip install -r requirements.txt` (Also install `pytest` if you wish to run unit tests).
+2. **Start Redis**: You must run a local Redis server on `localhost:6379`. (For Windows, you can use WSL, Memurai, or Docker).
+
+### Running the Application
+Open **three** terminal windows:
+1. **FastAPI Server**:
+   ```bash
+   uvicorn main:app --reload
+   ```
+2. **Celery Worker (Milestone 2 background queue)**:
+   ```bash
+   # On Windows, you often need the threads pool or solo pool to run celery locally without freezing
+   celery -A m2_advanced.celery_worker worker --loglevel=info -P solo
+   ```
+3. **Run the Concurrency Tests**:
+   ```bash
+   python test_concurrency.py
+   ```
+   You will see an output where exactly 1 request is accepted (Status: 202) and exactly 14 requests are blocked gracefully (Status: 409).
+
+### Unit Testing MVR (Milestone 1)
+Run `pytest test_mvr.py` (ensure `pytest` and `httpx` are installed) to verify the priority queue ordering logic and the regex urgency classifier.
