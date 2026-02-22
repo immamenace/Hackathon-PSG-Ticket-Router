@@ -6,3 +6,8 @@ torch
 redis
 celery
 httpx
+sentence-transformers
+scipy
+jinja2
+python-multipart
+rich
