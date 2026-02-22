@@ -22,37 +22,37 @@ http://localhost:8000
 
 That's it! You now have a fully functional ticket routing system with AI-powered classification, semantic deduplication, and intelligent agent assignment.
 
-## ✨ Features
+## Features
 
-### 🎯 Milestone 1: MVR (Baseline)
+### Milestone 1: MVR (Baseline)
 - TF-IDF + Naive Bayes classification
 - Regex-based urgency detection
 - Priority queue management
 - Synchronous processing
 
-### 🧠 Milestone 2: Intelligent Queue
+### Milestone 2: Intelligent Queue
 - DistilBERT zero-shot classification
 - Sentiment-based urgency scoring
 - Async processing with Celery
 - Redis atomic locks for idempotency
 
-### 🤖 Milestone 3: Autonomous Orchestrator ⭐
+### Milestone 3: Autonomous Orchestrator 
 - **Semantic Deduplication**: Detects ticket storms using sentence embeddings
 - **Circuit Breaker**: Auto-failover when transformer model is slow (>500ms)
 - **Skill-Based Routing**: Constraint optimization for agent assignment
 - **Self-Healing**: Automatic recovery and load balancing
 
-## 🎨 Web Interface
+## Web Interface
 
 Beautiful, modern UI with real-time updates:
 
-- 📝 Submit tickets with instant feedback
-- 👥 View agent status and capacity
-- 🔌 Monitor circuit breaker state
-- 🚨 Track master incidents
-- 📊 Live statistics dashboard
+- Submit tickets with instant feedback
+- View agent status and capacity
+- Monitor circuit breaker state
+- Track master incidents
+- Live statistics dashboard
 
-## 📊 Key Algorithms
+## Key Algorithms
 
 ### Semantic Deduplication
 ```
@@ -72,7 +72,7 @@ score = skill_match × capacity_factor × urgency_weight
 ```
 Assign to agent with highest score using constraint optimization
 
-## 🧪 Testing
+## Testing
 
 ### Run Test Suite
 ```bash
@@ -93,7 +93,7 @@ for i in {1..15}; do
 done
 ```
 
-## 📡 API Examples
+## API Examples
 
 ### Submit a Ticket
 ```bash
@@ -133,7 +133,7 @@ curl http://localhost:8000/orchestrator/agents
 curl http://localhost:8000/orchestrator/circuit-breaker/status
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -148,7 +148,7 @@ curl http://localhost:8000/orchestrator/circuit-breaker/status
     └── router.py                # API endpoints
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Normal Operations
 Tickets are intelligently routed to agents based on:
@@ -170,16 +170,7 @@ When transformer model is slow:
 - Maintains fast response times
 - Automatically recovers when stable
 
-## 📚 Documentation
-
-- **[QUICKSTART.md](QUICKSTART.md)** - Get started in 5 minutes
-- **[README_MILESTONE3.md](README_MILESTONE3.md)** - Detailed feature documentation
-- **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - Complete usage instructions
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture diagrams
-- **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** - Comprehensive overview
-- **[MILESTONE3_SUMMARY.md](MILESTONE3_SUMMARY.md)** - Implementation summary
-
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **FastAPI** - Modern web framework
 - **scikit-learn** - Baseline ML models
@@ -189,7 +180,7 @@ When transformer model is slow:
 - **Redis** - Caching and locks
 - **Celery** - Async task queue
 
-## 🎓 Key Concepts
+##  Key Concepts
 
 ### Semantic Deduplication
 Uses sentence embeddings to understand ticket meaning, not just keywords. Detects similar issues even with different wording.
@@ -200,7 +191,7 @@ Prevents cascade failures by automatically switching to a fallback when the prim
 ### Constraint Optimization
 Uses the Hungarian algorithm to optimally assign multiple tickets to agents, considering skills, capacity, and urgency.
 
-## 📈 Performance
+##  Performance
 
 | Component | Latency | Throughput |
 |-----------|---------|------------|
@@ -209,7 +200,7 @@ Uses the Hungarian algorithm to optimally assign multiple tickets to agents, con
 | Semantic Dedup | ~50ms | 20 req/s |
 | Skill Routing | ~5ms | 200 req/s |
 
-## 🔧 Configuration
+##  Configuration
 
 ### Adjust Circuit Breaker
 Edit `m3_orchestrator/circuit_breaker.py`:
@@ -242,7 +233,7 @@ Agent(
 )
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Port Already in Use
 ```bash
@@ -266,7 +257,7 @@ Try these scenarios:
 3. **High Urgency**: Use keywords like "URGENT", "CRITICAL", "DOWN"
 4. **Capacity Test**: Submit 30+ tickets to exhaust agents
 
-## 🌟 Highlights
+##  Highlights
 
 ✅ Production-ready code  
 ✅ Comprehensive testing  
@@ -277,22 +268,16 @@ Try these scenarios:
 ✅ Real-time monitoring  
 ✅ Extensive documentation  
 
-## 📝 License
+##  License
 
 MIT License - Hackathon Project
 
-## 🤝 Contributing
+##  Contributing
 
 This is a hackathon project, but feel free to fork and extend!
 
-## 📞 Support
-
-- Check the [USAGE_GUIDE.md](USAGE_GUIDE.md) for detailed instructions
-- Review [ARCHITECTURE.md](ARCHITECTURE.md) for system design
-- See [TROUBLESHOOTING](USAGE_GUIDE.md#troubleshooting) section
 
 ---
 
-**Built with ❤️ for the Smart Support Ticket Router Hackathon**
 
 🚀 **Get Started**: `python main.py` → `http://localhost:8000`
