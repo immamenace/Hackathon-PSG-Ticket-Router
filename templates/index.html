@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Support Ticket Router</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        
+        .result.warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+        
+        .result-item {
+            margin: 8px 0;
+        }
+        
+        .result-label {
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-technical { background: #007bff; color: white; }
+        .badge-billing { background: #28a745; color: white; }
+        .badge-legal { background: #6c757d; color: white; }
+        .badge-urgent { background: #dc3545; color: white; }
+        .badge-normal { background: #17a2b8; color: white; }
+        
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .agent-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .agent-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .capacity-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .capacity-fill {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎫 Smart Support Ticket Router</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTickets">0</div>
+                <div class="stat-label">Tickets Processed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="circuitState">CLOSED</div>
+                <div class="stat-label">Circuit Breaker</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="masterIncidents">0</div>
+                <div class="stat-label">Master Incidents</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Submit a Support Ticket</h2>
+            <form id="ticketForm">
+                <div class="form-group">
+                    <label for="userId">User ID</label>
+                    <input type="text" id="userId" name="userId" placeholder="user@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketText">Ticket Description</label>
+                    <textarea id="ticketText" name="ticketText" placeholder="Describe your issue..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Submit Ticket</button>
+            </form>
+            
+            <div id="result" class="result"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Available Agents</h2>
+            <div id="agentsContainer" class="loading">Loading agents...</div>
+        </div>
+    </div>
+    
+    <script>
+        let ticketCount = 0;
+        
+        // Load agents on page load
+        loadAgents();
+        loadStats();
+        
+        // Refresh agents every 5 seconds
+        setInterval(loadAgents, 5000);
+        setInterval(loadStats, 5000);
+        
+        document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const text = document.getElementById('ticketText').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = '<div class="loading">Processing ticket...</div>';
+            
+            try {
+                const response = await fetch('/orchestrator/ticket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: userId, text: text })
+                });
+                
+                const data = await response.json();
+                ticketCount++;
+                document.getElementById('totalTickets').textContent = ticketCount;
+                
+                if (data.is_duplicate) {
+                    resultDiv.className = 'result warning';
+                    resultDiv.innerHTML = `
+                        <div class="result-item">
+                            <span class="result-label">⚠️ Ticket Storm Detected!</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Master Incident:</span> ${data.master_incident_id}
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Status:</span> Individual alert suppressed
+                        </div>
+                    `;
+                } else {
+                    resultDiv.className = 'result success';
+                    const categoryBadge = `<span class="badge badge-${data.category.toLowerCase()}">${data.category}</span>`;
+                    const urgencyBadge = data.urgency_score > 0.7 
+                        ? '<span class="badge badge-urgent">URGENT</span>' 
+                        : '<span class="badge badge-normal">NORMAL</span>';
+                    
+                    let agentInfo = 'Queued (no agents available)';
+                    if (data.assigned_agent) {
+                        agentInfo = `${data.assigned_agent.agent_name} (${data.assigned_agent.agent_id})`;
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result-item">
+                            <span class="result-label">✅ Ticket ID:</span> ${data.ticket_id}
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Category:</span> ${categoryBadge}
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Urgency:</span> ${urgencyBadge} (${(data.urgency_score * 100).toFixed(0)}%)
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Model Used:</span> ${data.model_used}
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Assigned To:</span> ${agentInfo}
+                        </div>
+                    `;
+                }
+                
+                // Refresh agents to show updated capacity
+                loadAgents();
+                
+            } catch (error) {
+                resultDiv.className = 'result warning';
+                resultDiv.innerHTML = `<div class="result-item">❌ Error: ${error.message}</div>`;
+            }
+        });
+        
+        async function loadAgents() {
+            try {
+                const response = await fetch('/orchestrator/agents');
+                const data = await response.json();
+                
+                const container = document.getElementById('agentsContainer');
+                container.className = 'agents-grid';
+                
+                if (data.agents.length === 0) {
+                    container.innerHTML = '<p>No agents available</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.agents.map(agent => {
+                    const utilization = (agent.utilization * 100).toFixed(0);
+                    const skills = Object.entries(agent.skills)
+                        .filter(([_, value]) => value > 0)
+                        .map(([key, value]) => `${key}: ${(value * 100).toFixed(0)}%`)
+                        .join(', ');
+                    
+                    return `
+                        <div class="agent-card">
+                            <div class="agent-name">${agent.name}</div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                                ${skills}
+                            </div>
+                            <div style="font-size: 13px; margin-bottom: 4px;">
+                                Capacity: ${agent.current_capacity}/${agent.max_capacity}
+                            </div>
+                            <div class="capacity-bar">
+                                <div class="capacity-fill" style="width: ${utilization}%"></div>
+                            </div>
+                            <div style="font-size: 12px; color: #666;">
+                                ${utilization}% utilized
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading agents:', error);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const [circuitResponse, incidentsResponse] = await Promise.all([
+                    fetch('/orchestrator/circuit-breaker/status'),
+                    fetch('/orchestrator/master-incidents')
+                ]);
+                
+                const circuitData = await circuitResponse.json();
+                const incidentsData = await incidentsResponse.json();
+                
+                document.getElementById('circuitState').textContent = circuitData.state.toUpperCase();
+                document.getElementById('masterIncidents').textContent = 
+                    Object.keys(incidentsData.master_incidents).length;
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+    </script>
+</body>
+</html>
